@@ -1,0 +1,1696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Linear Speedrun</title>
+<style>
+  :root {
+    --bg: #0f1011; --panel: #161718; --panel2: #1c1d1f; --line: #26272b; --line-soft: #1b1c1f; --text: #e3e4e6; --strong: #fff;
+    --dim: #8a8f98; --faint: #5c6066; --accent: #5e6ad2; --good: #4cb782; --warn: #f2994a; --bad: #eb5757;
+    --side: #121314; --chrome: #121316; --hl: #1f2024; --sel: #1d2038; --sel-hl: #262a4a; --nav-on: #222327; --menu-on: #1d1f33;
+    --kbd-bg: #222326; --kbd-line: #3a3c42; --pop: #1d1e21; --pop-line: #34363c; --opt-on: #2a2c33; --scrim: #0008;
+    --shadow: #000c; --toast: #25262b; --toast-line: #383a40; --chip-f: #b8bdf5; --mark: #2a2d4a; --bar: #25262a;
+    --flash: #1f3b2c; --star-off: #34363b; --cb-line: #44464d; --av-none: #4a4c52; --miss-line: #6b2c2c; --miss: #f19a9a;
+    --status-todo: #c4c7cc;
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg: #ffffff; --panel: #f7f7f8; --panel2: #ffffff; --line: #e6e6ea; --line-soft: #f0f0f2; --text: #282a30; --strong: #111216;
+    --dim: #6b6f76; --faint: #9a9ea6; --accent: #5e6ad2; --good: #26a269; --warn: #e5822f;
+    --side: #f9f9fa; --chrome: #fbfbfc; --hl: #f3f3f5; --sel: #eef0fc; --sel-hl: #e4e7fb; --nav-on: #ececef; --menu-on: #eef0fc;
+    --kbd-bg: #ffffff; --kbd-line: #d6d7dc; --pop: #ffffff; --pop-line: #e1e2e6; --opt-on: #f1f1f4; --scrim: #1b1c2033;
+    --shadow: #1b1c2026; --toast: #ffffff; --toast-line: #e1e2e6; --chip-f: #4b55b8; --mark: #e7e9fb; --bar: #e8e8ec;
+    --flash: #ddf3e6; --star-off: #e2e3e7; --cb-line: #c4c6cc; --av-none: #b9bbc2; --miss-line: #f0b4b4; --miss: #c23b3b;
+    --status-todo: #9a9ea6;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; }
+  #root { height: 100%; display: flex; flex-direction: column; }
+  kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--kbd-line);
+    border-bottom-width: 2px; background: var(--kbd-bg); color: var(--text); font: 600 11px/18px ui-monospace, Menlo, monospace; text-align: center; }
+  .then { color: var(--faint); margin: 0 4px; font-size: 11px; }
+
+  /* ---------- Menu ---------- */
+  .menu { max-width: 980px; margin: 0 auto; padding: 40px 24px; width: 100%; overflow: auto; }
+  .logo { font: 800 34px/1 ui-monospace, Menlo, monospace; letter-spacing: 2px; }
+  .logo span { color: var(--accent); }
+  .tag { color: var(--dim); margin: 8px 0 28px; }
+  .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
+  .lvl { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px;
+    margin-bottom: 8px; background: var(--panel); cursor: pointer; }
+  .lvl.on { border-color: var(--accent); background: var(--menu-on); }
+  .lvl .n { font: 700 18px ui-monospace, Menlo, monospace; color: var(--faint); width: 22px; }
+  .lvl .t { font-weight: 600; font-size: 14px; }
+  .lvl .b { color: var(--dim); font-size: 12px; }
+  .lvl .s { margin-left: auto; color: #f5c451; letter-spacing: 2px; white-space: nowrap; }
+  .lvl .s .off { color: var(--star-off); }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--panel); margin-bottom: 14px; }
+  .card h3 { margin: 0 0 6px; font-size: 14px; }
+  .card p { margin: 0 0 10px; color: var(--dim); }
+  .big { font: 700 28px ui-monospace, Menlo, monospace; }
+  .help-row { display: flex; justify-content: space-between; padding: 3px 0; gap: 10px; }
+  .help-row span:last-child { color: var(--dim); text-align: right; }
+  .cheat { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px 28px; align-items: start; }
+  .cheat-grp .help-row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; padding: 2px 0; }
+  .cheat-grp .help-row > span:first-child { white-space: nowrap; }
+  .cheat-grp .help-row > span:last-child { text-align: left; }
+  .panel.cheat-panel { width: min(900px, 94vw); max-height: 85vh; }
+  .cheat h4 { margin: 0 0 4px; color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ---------- HUD ---------- */
+  .hud { display: grid; grid-template-columns: 220px 1fr 260px; gap: 16px; align-items: center; padding: 12px 18px;
+    border-bottom: 1px solid var(--line); background: var(--chrome); }
+  .hud .meta { color: var(--dim); font-size: 12px; }
+  .hud .meta b { color: var(--text); display: block; font-size: 13px; }
+  .bar { height: 4px; background: var(--bar); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .prompt { font-size: 17px; font-weight: 500; text-align: center; }
+  .prompt b { color: var(--strong); background: var(--mark); padding: 0 6px; border-radius: 4px; }
+  .prompt.solved { color: var(--good); }
+  .hint { text-align: center; color: var(--dim); margin-top: 6px; min-height: 22px; font-size: 12px; }
+  .hint .new { color: var(--warn); font-weight: 700; margin-right: 6px; }
+  .hud-r { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+  .stat { text-align: right; color: var(--dim); font-size: 11px; }
+  .stat b { display: block; font: 700 18px ui-monospace, Menlo, monospace; color: var(--text); }
+  .btn { border: 1px solid var(--line); background: var(--panel2); color: var(--dim); border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 12px; }
+  .btn:hover { color: var(--text); }
+  .flash { animation: flash .5s; }
+  @keyframes flash { 0% { background: var(--flash); } 100% { background: var(--chrome); } }
+  .shake { animation: shake .25s; }
+  @keyframes shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+
+  /* ---------- Fake Linear app ---------- */
+  .app { flex: 1; display: flex; min-height: 0; position: relative; user-select: none; }
+  .side { width: 210px; border-right: 1px solid var(--line); padding: 12px 8px; background: var(--side); flex-shrink: 0; }
+  .ws { font-weight: 700; padding: 4px 8px 12px; display: flex; gap: 8px; align-items: center; }
+  .ws i { width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(135deg, #5e6ad2, #9b6ad2); display: inline-block; }
+  .nav { padding: 5px 8px; border-radius: 6px; color: var(--dim); display: flex; justify-content: space-between; }
+  .nav.on { background: var(--nav-on); color: var(--text); }
+  .nav .cnt { color: var(--faint); font-size: 11px; }
+  .sec { color: var(--faint); font-size: 11px; padding: 14px 8px 4px; }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .head { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+  .head .title { font-weight: 600; }
+  .chip { border: 1px solid var(--line); border-radius: 12px; padding: 1px 8px; font-size: 11px; color: var(--dim); }
+  .chip.f { border-color: var(--accent); color: var(--chip-f); }
+  .head .sp { flex: 1; }
+  .body { flex: 1; overflow: auto; }
+  .grp { padding: 6px 16px; background: var(--panel); color: var(--dim); font-size: 12px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; }
+  .row { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 16px; border-bottom: 1px solid var(--line-soft); }
+  .row.hl { background: var(--hl); box-shadow: inset 2px 0 0 var(--accent); }
+  .row.sel { background: var(--sel); }
+  .row.sel.hl { background: var(--sel-hl); }
+  .row .id { color: var(--dim); width: 64px; font-size: 12px; flex-shrink: 0; }
+  .row .tt { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .meta { display: flex; gap: 6px; align-items: center; color: var(--dim); font-size: 11px; }
+  .cb { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--cb-line); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+  .cb.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .lab { border: 1px solid var(--line); border-radius: 10px; padding: 0 7px; font-size: 11px; color: var(--dim); white-space: nowrap; }
+  .lab i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+  .av { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #111; flex-shrink: 0; }
+  .av.none { border: 1px dashed var(--av-none); }
+  .st { width: 14px; text-align: center; flex-shrink: 0; }
+  .pr { width: 26px; text-align: center; color: var(--dim); font-size: 9px; flex-shrink: 0; letter-spacing: -1px; white-space: nowrap; }
+  .pr.u { width: 18px; margin: 0 4px; font-size: 11px; }
+  .pr.u { color: #fff; background: var(--warn); border-radius: 3px; font-weight: 800; letter-spacing: 0; }
+  .board { display: flex; gap: 12px; padding: 12px; align-items: flex-start; }
+  .colm { width: 230px; flex-shrink: 0; }
+  .colm h5 { margin: 0 0 8px; color: var(--dim); font-weight: 500; font-size: 12px; display: flex; gap: 6px; }
+  .bcard { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; margin-bottom: 8px; }
+  .bcard.hl { border-color: var(--accent); }
+  .bcard.sel { background: var(--sel); }
+  .bcard .id { color: var(--dim); font-size: 11px; display: flex; justify-content: space-between; }
+  .detail { display: flex; height: 100%; }
+  .detail .doc { flex: 1; padding: 28px 40px; overflow: auto; }
+  .detail h1 { font-size: 22px; margin: 6px 0 14px; }
+  .detail .desc { color: var(--dim); }
+  .props { width: 250px; border-left: 1px solid var(--line); padding: 16px; flex-shrink: 0; }
+  .prop { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; gap: 8px; }
+  .prop > span:first-child { color: var(--faint); font-size: 12px; }
+  .prop > span:last-child { text-align: right; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  .subhead { color: var(--faint); font-size: 12px; margin: 22px 0 6px; }
+  .inbox { display: flex; height: 100%; }
+  .inbox .lst { width: 380px; border-right: 1px solid var(--line); overflow: auto; }
+  .notif { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line-soft); align-items: flex-start; }
+  .notif.hl { background: var(--hl); box-shadow: inset 2px 0 0 var(--accent); }
+  .notif .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0; }
+  .notif.read .dot { background: transparent; }
+  .notif.read { color: var(--dim); }
+  .notif small { color: var(--faint); display: block; }
+  .empty { color: var(--faint); padding: 40px; text-align: center; }
+  .peek { position: absolute; right: 16px; top: 60px; width: 340px; background: var(--pop); border: 1px solid var(--pop-line); border-radius: 10px;
+    box-shadow: 0 20px 50px var(--shadow); padding: 16px; }
+  .peek h2 { font-size: 15px; margin: 4px 0 10px; }
+
+  /* ---------- Overlays ---------- */
+  .scrim { position: absolute; inset: 0; background: var(--scrim); display: flex; justify-content: center; align-items: flex-start; padding-top: 70px; }
+  .palette { width: 560px; background: var(--pop); border: 1px solid var(--pop-line); border-radius: 12px; box-shadow: 0 30px 80px var(--shadow); overflow: hidden; }
+  .palette .ctx { padding: 10px 14px 0; color: var(--dim); font-size: 11px; }
+  .palette .q { padding: 10px 14px 12px; font-size: 15px; border-bottom: 1px solid var(--line); }
+  .palette .q .ph { color: var(--faint); }
+  .caret { display: inline-block; width: 1px; height: 17px; background: var(--accent); vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .opt { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+  .opt.on { background: var(--opt-on); }
+  .opt .k { margin-left: auto; color: var(--faint); font-size: 11px; }
+  .modal { width: 640px; background: var(--pop); border: 1px solid var(--pop-line); border-radius: 12px; box-shadow: 0 30px 80px var(--shadow); padding: 16px 18px; }
+  .modal .crumb { color: var(--dim); font-size: 12px; margin-bottom: 12px; }
+  .modal .ti { font-size: 18px; font-weight: 600; min-height: 28px; }
+  .modal .de { color: var(--faint); margin: 8px 0 30px; }
+  .modal .foot { display: flex; justify-content: flex-end; gap: 8px; color: var(--faint); font-size: 12px; align-items: center; }
+  .panel { width: 640px; max-height: 75vh; overflow: auto; background: var(--pop); border: 1px solid var(--pop-line); border-radius: 12px; padding: 18px; box-shadow: 0 30px 80px var(--shadow); }
+  .toast { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--toast); border: 1px solid var(--toast-line);
+    padding: 8px 14px; border-radius: 8px; box-shadow: 0 10px 30px var(--shadow); }
+  .keystrip { height: 34px; border-top: 1px solid var(--line); background: var(--chrome); display: flex; align-items: center; gap: 6px; padding: 0 14px; color: var(--faint); font-size: 11px; }
+  .keystrip kbd.miss { border-color: var(--miss-line); color: var(--miss); }
+  .keystrip .chord { color: var(--warn); margin-left: 8px; }
+
+  /* ---------- Summary ---------- */
+  .done { margin: auto; text-align: center; padding: 40px; }
+  .done .stars { font-size: 44px; color: #f5c451; letter-spacing: 8px; }
+  .done .stars .off { color: var(--star-off); }
+  .done table { margin: 18px auto; border-collapse: collapse; }
+  .done td { padding: 4px 14px; text-align: left; }
+  .done td:first-child { color: var(--dim); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+
+// ====================================================================================
+// Constants
+// ====================================================================================
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform);
+const MOD = IS_MAC ? "⌘" : "Ctrl+";
+const ALT = IS_MAC ? "⌥" : "Alt+";
+
+const STATUSES = ["Backlog", "Todo", "In Progress", "In Review", "Done", "Canceled"];
+const STATUS_ICON = {
+  Triage: ["◇", "#f2994a"], Backlog: ["◌", "#8a8f98"], Todo: ["○", "var(--status-todo)"], "In Progress": ["◐", "#f2c94c"],
+  "In Review": ["◑", "#4cb782"], Done: ["●", "#5e6ad2"], Canceled: ["⊘", "#6b6f76"],
+};
+const PRIORITIES = ["No priority", "Urgent", "High", "Medium", "Low"];
+const USERS = ["You", "Sam", "Alex", "Priya", "Jonas"];
+const USER_COLOR = { You: "#5e6ad2", Sam: "#f2994a", Alex: "#4cb782", Priya: "#eb5757", Jonas: "#f2c94c" };
+const LABELS = ["Bug", "Feature", "Improvement", "Design", "Docs"];
+const LABEL_COLOR = { Bug: "#eb5757", Feature: "#bb87fc", Improvement: "#4ea7fc", Design: "#f2994a", Docs: "#4cb782" };
+const PROJECTS = ["Mobile app", "Billing revamp", "Onboarding v2"];
+const TEAMS = [{ key: "ENG", name: "Engineering" }, { key: "DES", name: "Design" }];
+const DUE = ["Today", "Tomorrow", "End of week", "Next week"];
+
+const SEED_ISSUES = [
+  [101, "Login button unresponsive on Safari", "Todo", 2, "Sam", ["Bug"], "Mobile app"],
+  [102, "Add dark mode toggle", "Backlog", 0, null, ["Feature"], null],
+  [103, "Invoice PDF cuts off long addresses", "In Progress", 3, "You", ["Bug"], "Billing revamp"],
+  [104, "Rate limit the export endpoint", "Todo", 0, null, [], null],
+  [105, "Onboarding checklist copy", "Backlog", 4, "Priya", ["Docs"], "Onboarding v2"],
+  [106, "Crash when uploading HEIC photos", "Todo", 1, null, ["Bug"], "Mobile app"],
+  [107, "Keyboard shortcuts cheat sheet", "In Review", 3, "Alex", ["Feature"], null],
+  [108, "Migrate cron jobs to Temporal", "In Progress", 2, "Jonas", [], null],
+  [109, "Empty state for projects page", "Backlog", 0, null, ["Design"], "Onboarding v2"],
+  [110, "Flaky checkout e2e test", "Todo", 2, null, ["Bug"], "Billing revamp"],
+  [111, "Customer: CSV import fails with umlauts", "Triage", 0, null, [], null],
+  [112, "Sentry: TypeError in map view", "Triage", 0, null, ["Bug"], null],
+];
+const TRIAGE_POOL = [
+  "Customer: can't reset password", "Sentry: null deref in sync worker", "Support: export times out",
+  "Slack: dashboard shows wrong totals", "Customer: email preview is blank", "Sentry: 500 on /api/projects",
+];
+const NEW_TITLES = [
+  "Fix typo on pricing page", "Add retry to webhook sender", "Upgrade React to latest", "Write onboarding email",
+  "Cache avatar images", "Remove unused feature flag", "Add CSV export", "Improve search ranking", "Audit npm dependencies",
+  "Support SSO login", "Speed up cold start", "Add tooltip to save button",
+];
+const SUB_TITLES = ["Write tests", "Update docs", "QA on staging", "Add metrics", "Design review", "Clean up logs"];
+
+const CHEATS = [
+  ["Navigate", [["J / K", "Move down / up (↓ ↑ too)"], ["↵", "Open issue"], ["Esc", "Back / clear"], ["Space", "Peek preview"],
+    ["G then I", "Go to Inbox"], ["G then M", "Go to My issues"], ["G then T", "Go to Triage"], ["O then F", "Open a favorite"]]],
+  ["Create", [["C", "Create issue"], [`${MOD}↵`, "Save the new issue"], [`${MOD}⇧O`, "Create sub-issue"]]],
+  ["Edit issue", [["S", "Status"], ["P", "Priority (then 0–4)"], ["A", "Assign"], ["I", "Assign to me"], ["L", "Labels"],
+    ["⇧P", "Project"], ["⇧D", "Due date"], [`${MOD}⇧M`, "Move to team"], ["⇧S", "Subscribe / unsubscribe"], [`${ALT}F`, "Favorite"]]],
+  ["Find & view", [[`${MOD}K`, "Command menu"], ["/", "Search"], ["F", "Filter"], ["⇧V", "Display options"], [`${MOD}B`, "List ↔ board"], [`${MOD}/`, "Keyboard shortcuts"], ["?", "Help menu"]]],
+  ["Select", [["X", "Select issue"], ["⇧↓ / ⇧↑", "Extend selection"], [`${MOD}A`, "Select all"], ["Esc", "Clear selection"], [`${MOD}Z`, "Undo"]]],
+  ["Relations", [["M then R", "Related to…"], ["M then B", "Blocked by…"], ["M then X", "Blocking…"]]],
+  ["Inbox", [["U", "Read / unread"], [`${ALT}U`, "Mark all read"], ["H", "Snooze"], ["⌫", "Delete"], ["⇧⌫", "Delete all read"]]],
+  ["Triage", [["1", "Accept"], ["2", "Decline"], ["3 / M M", "Mark duplicate"], ["H", "Snooze"]]],
+  ["Copy", [[`${MOD}.`, "Copy issue ID"], [`${MOD}⇧.`, "Copy git branch name"]]],
+];
+
+// ====================================================================================
+// Helpers
+// ====================================================================================
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const rand = (xs) => (xs.length ? xs[Math.floor(Math.random() * xs.length)] : null);
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const norm = (t) => t.trim().toLowerCase();
+const now = () => performance.now();
+const ident = (i) => `${i.team}-${i.num}`;
+const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+
+function kbdHtml(label) {
+  return label.split(" then ").map((part) => part.split(" / ").map((p) => `<kbd>${esc(p)}</kbd>`).join('<span class="then">/</span>'))
+    .join('<span class="then">then</span>');
+}
+
+function keyLabel(combo) {
+  const map = { mod: IS_MAC ? "⌘" : "Ctrl", alt: IS_MAC ? "⌥" : "Alt", shift: "⇧", enter: "↵", esc: "Esc", backspace: "⌫", space: "Space",
+    up: "↑", down: "↓", left: "←", right: "→", tab: "Tab" };
+  return combo.split("+").map((p) => map[p] ?? p.toUpperCase()).join(IS_MAC ? "" : "+");
+}
+
+const NAMED_KEYS = { Enter: "enter", Escape: "esc", Backspace: "backspace", Delete: "backspace", ArrowUp: "up",
+  ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", Tab: "tab", " ": "space" };
+const CODE_KEYS = { Period: ".", Comma: ",", Slash: "/", Space: "space", Enter: "enter" };
+
+// Letters keep Shift ("shift+p"); symbols bake Shift in ("?"), so layouts like German still work.
+// With Cmd/Alt held we fall back to the physical key, because macOS mangles e.key for Alt combos.
+function comboOf(e) {
+  const mod = e.metaKey || e.ctrlKey;
+  let k = NAMED_KEYS[e.key] ?? null;
+  let keepShift = true;
+  if (!k) {
+    if (mod && e.key === "/") {
+      k = "/";
+      keepShift = false;
+    } else if (mod || e.altKey) {
+      const c = e.code;
+      k = c.startsWith("Key") ? c.slice(3).toLowerCase() : c.startsWith("Digit") ? c.slice(5) : CODE_KEYS[c] ?? null;
+    } else if (e.key.length === 1) {
+      if (/[a-z]/i.test(e.key)) k = e.key.toLowerCase();
+      else { k = e.key; keepShift = false; }
+    }
+  }
+  if (!k) return null;
+  return [mod && "mod", e.altKey && "alt", e.shiftKey && keepShift && "shift", k].filter(Boolean).join("+");
+}
+
+const isPrintable = (e) => e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey;
+
+// ====================================================================================
+// Simulated Linear workspace
+// ====================================================================================
+let uidCounter = 1;
+let nidCounter = 1;
+
+function seedNotifications() {
+  return [
+    ["u101", "Sam mentioned you", "“can you take a look at this one?”"],
+    ["u107", "Alex requested your review", "PR #482 is ready"],
+    ["u105", "Priya commented", "“copy is final, ship it”"],
+    ["u106", "Priority changed to Urgent", "by Jonas"],
+    ["u108", "Jonas assigned you", "Migrate cron jobs to Temporal"],
+    ["u110", "Status changed to Todo", "by Sam"],
+  ].map(([uid, text, sub]) => ({ nid: "n" + nidCounter++, uid, text, sub, read: false, snoozed: false }));
+}
+
+function seedWorld() {
+  return {
+    issues: SEED_ISSUES.map(([num, title, status, priority, assignee, labels, project]) => ({
+      uid: "u" + num, team: "ENG", num, title, status, priority, assignee, labels: [...labels], project,
+      due: null, subscribed: true, favorite: false, parent: null, snoozed: false,
+    })),
+    nextNum: { ENG: 113, DES: 41 },
+    notifications: seedNotifications(),
+    relations: [],
+    page: "issues", layout: "list", cursor: 0, selected: [], openIssue: null, peek: false,
+    overlay: null, filter: null, chord: null, undo: [], toast: null, events: [],
+  };
+}
+
+let S = seedWorld();
+
+const getIssue = (uid) => S.issues.find((i) => i.uid === uid) ?? null;
+
+function listIssues() {
+  let xs = S.issues;
+  if (S.page === "triage") xs = xs.filter((i) => i.status === "Triage" && !i.snoozed);
+  else {
+    xs = xs.filter((i) => i.status !== "Triage");
+    if (S.page === "my") xs = xs.filter((i) => i.assignee === "You");
+    if (S.filter) {
+      const { field, value } = S.filter;
+      xs = xs.filter((i) => (field === "labels" ? i.labels.includes(value) : i[field] === value));
+    }
+  }
+  return [...xs].sort((a, b) => STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status) || a.num - b.num);
+}
+
+const items = () => (S.page === "inbox" ? S.notifications.filter((n) => !n.snoozed) : listIssues());
+
+function clampCursor() {
+  const n = items().length;
+  S.cursor = Math.max(0, Math.min(S.cursor, n - 1));
+}
+
+const current = () => items()[S.cursor] ?? null;
+
+function currentIssue() {
+  const c = current();
+  if (!c) return null;
+  return S.page === "inbox" ? getIssue(c.uid) : c;
+}
+
+function targets() {
+  if (S.openIssue) return [getIssue(S.openIssue)].filter(Boolean);
+  if (S.page !== "inbox" && S.selected.length) return S.selected.map(getIssue).filter(Boolean);
+  const c = currentIssue();
+  return c ? [c] : [];
+}
+
+function snapshot() {
+  S.undo.push(clone({ issues: S.issues, notifications: S.notifications, relations: S.relations, nextNum: S.nextNum }));
+  if (S.undo.length > 40) S.undo.shift();
+}
+
+const ev = (type, data = {}) => S.events.push({ type, ...data });
+const toast = (msg) => { S.toast = { msg, t: now() }; };
+
+function needTarget() {
+  const ts = targets();
+  if (!ts.length) toast("Highlight an issue first");
+  return ts;
+}
+
+function openMenu({ kind, title, options, onPick, numbered = null, placeholder = "Type to filter…" }) {
+  S.overlay = { kind, title, options, onPick, numbered, placeholder, query: "", index: 0 };
+}
+
+const filteredOptions = (o) => o.options.filter((x) => norm(x.label).includes(norm(o.query)));
+
+function propMenu(field, via = "key") {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  const uids = ts.map((i) => i.uid);
+  const what = uids.length > 1 ? `${uids.length} issues` : ident(ts[0]);
+  const cfg = {
+    status: { title: "Change status", options: STATUSES.map((s) => ({ label: s, value: s, icon: statusIcon(s) })), numbered: "one",
+      set: (i, v) => { i.status = v; } },
+    priority: { title: "Set priority", options: PRIORITIES.map((p, n) => ({ label: p, value: n, icon: prioIcon(n) })), numbered: "zero",
+      set: (i, v) => { i.priority = v; } },
+    assignee: { title: "Assign to", options: [{ label: "No assignee", value: null, icon: avatar(null) },
+      ...USERS.map((u) => ({ label: u === "You" ? "You (me)" : u, value: u, icon: avatar(u) }))],
+      set: (i, v) => { i.assignee = v; } },
+    labels: { title: "Add labels", options: LABELS.map((l) => ({ label: l, value: l, icon: `<i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${LABEL_COLOR[l]}"></i>` })) },
+    project: { title: "Add to project", options: [{ label: "No project", value: null }, ...PROJECTS.map((p) => ({ label: p, value: p, icon: "◆" }))],
+      set: (i, v) => { i.project = v; } },
+    due: { title: "Set due date", options: DUE.map((d) => ({ label: d, value: d, icon: "📅" })), set: (i, v) => { i.due = v; } },
+    team: { title: "Move to team", options: TEAMS.map((t) => ({ label: `${t.name} (${t.key})`, value: t.key })),
+      set: (i, v) => { if (i.team !== v) { i.team = v; i.num = S.nextNum[v]++; } } },
+  }[field];
+  openMenu({
+    kind: field, title: `${cfg.title} · ${what}`, options: cfg.options, numbered: cfg.numbered,
+    onPick: (v) => {
+      snapshot();
+      const issues = uids.map(getIssue).filter(Boolean);
+      if (field === "labels") {
+        const all = issues.every((i) => i.labels.includes(v));
+        issues.forEach((i) => { i.labels = all ? i.labels.filter((l) => l !== v) : [...new Set([...i.labels, v])]; });
+      } else issues.forEach((i) => cfg.set(i, v));
+      ev("set", { field, value: v, uids, via });
+    },
+  });
+  return true;
+}
+
+function assignMe(via) {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  snapshot();
+  ts.forEach((i) => { i.assignee = "You"; });
+  ev("assignMe", { uids: ts.map((i) => i.uid), via });
+  toast(`Assigned ${ts.length > 1 ? ts.length + " issues" : ident(ts[0])} to you`);
+  return true;
+}
+
+function toggleFlag(flag, onMsg, offMsg) {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  snapshot();
+  const value = !ts.every((i) => i[flag]);
+  ts.forEach((i) => { i[flag] = value; });
+  ev(flag, { uids: ts.map((i) => i.uid), value });
+  toast(value ? onMsg : offMsg);
+  return true;
+}
+
+function openIssueView(uid, via) {
+  const issue = getIssue(uid);
+  if (!issue) return;
+  if (S.page !== "inbox") {
+    if (issue.status === "Triage" && S.page !== "triage") S.page = "triage";
+    if (issue.status !== "Triage" && S.page === "triage") S.page = "issues";
+    if (!listIssues().some((i) => i.uid === uid)) { S.page = "issues"; S.filter = null; }
+    S.cursor = Math.max(0, listIssues().findIndex((i) => i.uid === uid));
+  }
+  S.openIssue = uid;
+  S.peek = false;
+  S.selected = [];
+  ev("open", { uid, via });
+}
+
+function openCreate(parent = null) {
+  S.overlay = { kind: "create", text: "", parent };
+  return true;
+}
+
+function submitCreate() {
+  const o = S.overlay;
+  const title = o.text.trim();
+  if (!title) { toast("Give it a title first"); return true; }
+  snapshot();
+  const parent = o.parent ? getIssue(o.parent) : null;
+  const team = parent ? parent.team : "ENG";
+  const issue = { uid: "c" + uidCounter++, team, num: S.nextNum[team]++, title, status: S.page === "triage" ? "Triage" : "Todo",
+    priority: parent ? parent.priority : 0, assignee: null, labels: [], project: parent ? parent.project : null, due: null,
+    subscribed: true, favorite: false, parent: o.parent, snoozed: false };
+  S.issues.push(issue);
+  ev("create", { uid: issue.uid, title, parent: o.parent });
+  toast(`Created ${ident(issue)} — ${title}`);
+  S.overlay = null;
+  return true;
+}
+
+function cmdK() {
+  const C = (label, keys, run) => ({ label, keys, value: run });
+  openMenu({
+    kind: "cmdk", title: "Command menu", placeholder: "Type a command or search…",
+    options: [
+      C("Create new issue", "C", () => openCreate()),
+      C("Change status…", "S", () => propMenu("status", "cmdk")),
+      C("Change priority…", "P", () => propMenu("priority", "cmdk")),
+      C("Assign to…", "A", () => propMenu("assignee", "cmdk")),
+      C("Assign to me", "I", () => assignMe("cmdk")),
+      C("Add labels…", "L", () => propMenu("labels", "cmdk")),
+      C("Add to project…", "⇧P", () => propMenu("project", "cmdk")),
+      C("Set due date…", "⇧D", () => propMenu("due", "cmdk")),
+      C("Move to team…", `${MOD}⇧M`, () => propMenu("team", "cmdk")),
+      C("Create sub-issue", `${MOD}⇧O`, () => subIssue()),
+      C("Copy issue ID", `${MOD}.`, () => copy("id")),
+      C("Copy git branch name", `${MOD}⇧.`, () => copy("branch")),
+      C("Subscribe / unsubscribe", "⇧S", () => toggleFlag("subscribed", "Subscribed", "Unsubscribed")),
+      C("Favorite / unfavorite", `${ALT}F`, () => toggleFlag("favorite", "Added to favorites", "Removed from favorites")),
+      C("Go to inbox", "G I", () => goPage("inbox")),
+      C("Go to my issues", "G M", () => goPage("my")),
+      C("Go to triage", "G T", () => goPage("triage")),
+      C("Toggle list / board layout", `${MOD}B`, () => toggleLayout()),
+      C("Show display options", "⇧V", () => showDisplay()),
+      C("Filter…", "F", () => filterMenu()),
+      C("Undo", `${MOD}Z`, () => undo()),
+    ],
+    onPick: (fn) => fn(),
+  });
+  return true;
+}
+
+function searchMenu() {
+  openMenu({
+    kind: "search", title: "Search issues", placeholder: "Search by title or ID…",
+    options: S.issues.map((i) => ({ label: `${ident(i)}  ${i.title}`, value: i.uid, icon: statusIcon(i.status) })),
+    onPick: (uid) => openIssueView(uid, "search"),
+  });
+  return true;
+}
+
+function filterMenu() {
+  if (S.page === "inbox" || S.page === "triage") { toast("No filters here"); return false; }
+  const fields = [["status", "Status"], ["priority", "Priority"], ["assignee", "Assignee"], ["labels", "Label"], ["project", "Project"]];
+  openMenu({
+    kind: "filter", title: "Add filter", placeholder: "Filter by…",
+    options: fields.map(([value, label]) => ({ label, value })),
+    onPick: (field) => {
+      const values = {
+        status: STATUSES.map((s) => ({ label: s, value: s, icon: statusIcon(s) })),
+        priority: PRIORITIES.map((p, n) => ({ label: p, value: n, icon: prioIcon(n) })),
+        assignee: [{ label: "No assignee", value: null }, ...USERS.map((u) => ({ label: u, value: u, icon: avatar(u) }))],
+        labels: LABELS.map((l) => ({ label: l, value: l })),
+        project: [{ label: "No project", value: null }, ...PROJECTS.map((p) => ({ label: p, value: p }))],
+      }[field];
+      openMenu({
+        kind: "filter2", title: `Filter · ${fields.find((f) => f[0] === field)[1]}`, options: values,
+        onPick: (value) => {
+          S.filter = { field, value, label: values.find((v) => v.value === value).label };
+          S.cursor = 0;
+          S.selected = [];
+          ev("filter", { field, value });
+        },
+      });
+    },
+  });
+  return true;
+}
+
+function goPage(page) {
+  S.page = page;
+  S.openIssue = null;
+  S.peek = false;
+  S.selected = [];
+  S.cursor = 0;
+  ev("goto", { page });
+  return true;
+}
+
+function toggleLayout() {
+  if (S.page === "inbox" || S.page === "triage") { toast("Board layout isn't available here"); return false; }
+  S.layout = S.layout === "list" ? "board" : "list";
+  ev("layout", { layout: S.layout });
+  return true;
+}
+
+function showDisplay() {
+  S.overlay = { kind: "display" };
+  ev("display");
+  return true;
+}
+
+function undo() {
+  const snap = S.undo.pop();
+  if (!snap) { toast("Nothing to undo"); return false; }
+  Object.assign(S, snap);
+  ev("undo");
+  toast("Undone");
+  clampCursor();
+  return true;
+}
+
+function copy(kind) {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  const i = ts[0];
+  const text = kind === "id" ? ident(i) : `you/${i.team.toLowerCase()}-${i.num}-${slug(i.title)}`;
+  ev("copy", { kind, uid: i.uid });
+  toast(`Copied <code>${esc(text)}</code>`);
+  return true;
+}
+
+function subIssue() {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  return openCreate(ts[0].uid);
+}
+
+function relationMenu(type) {
+  const ts = needTarget();
+  if (!ts.length) return false;
+  const a = ts[0];
+  const verb = { related: "Mark as related to", blockedBy: "Mark as blocked by", blocks: "Mark as blocking" }[type];
+  openMenu({
+    kind: "relation", title: `${verb}… · ${ident(a)}`, placeholder: "Search issues…",
+    options: S.issues.filter((i) => i.uid !== a.uid).map((i) => ({ label: `${ident(i)}  ${i.title}`, value: i.uid, icon: statusIcon(i.status) })),
+    onPick: (to) => {
+      snapshot();
+      S.relations.push({ from: a.uid, type, to });
+      ev("relation", { from: a.uid, type, to });
+      toast(`${ident(a)}: ${verb.toLowerCase()} ${ident(getIssue(to))}`);
+    },
+  });
+  return true;
+}
+
+function triageAction(action) {
+  if (S.page !== "triage") return false;
+  const ts = needTarget();
+  if (!ts.length) return false;
+  const i = ts[0];
+  if (action === "duplicate") {
+    openMenu({
+      kind: "relation", title: `Mark ${ident(i)} as duplicate of…`, placeholder: "Search issues…",
+      options: S.issues.filter((x) => x.uid !== i.uid && x.status !== "Triage").map((x) => ({ label: `${ident(x)}  ${x.title}`, value: x.uid })),
+      onPick: (to) => {
+        snapshot();
+        getIssue(i.uid).status = "Canceled";
+        S.relations.push({ from: i.uid, type: "duplicateOf", to });
+        ev("triage", { uid: i.uid, action });
+        toast(`${ident(i)} marked as duplicate`);
+      },
+    });
+    return true;
+  }
+  snapshot();
+  i.status = action === "accept" ? "Todo" : "Canceled";
+  ev("triage", { uid: i.uid, action });
+  toast(`${ident(i)} ${action === "accept" ? "accepted → Todo" : "declined"}`);
+  clampCursor();
+  return true;
+}
+
+function snoozeMenu() {
+  if (S.page === "inbox") {
+    const n = current();
+    if (!n) return false;
+    openMenu({
+      kind: "snooze", title: "Snooze notification until…", options: ["1 hour", "Tomorrow", "Next week"].map((x) => ({ label: x, value: x, icon: "⏰" })),
+      onPick: (until) => { snapshot(); S.notifications.find((x) => x.nid === n.nid).snoozed = true; ev("snooze", { nid: n.nid }); toast(`Snoozed until ${until.toLowerCase()}`); clampCursor(); if (S.openIssue === n.uid) S.openIssue = null; },
+    });
+    return true;
+  }
+  if (S.page === "triage") {
+    const ts = needTarget();
+    if (!ts.length) return false;
+    const uid = ts[0].uid;
+    openMenu({
+      kind: "snooze", title: "Snooze triage issue until…", options: ["1 hour", "Tomorrow", "Next week"].map((x) => ({ label: x, value: x, icon: "⏰" })),
+      onPick: () => { snapshot(); getIssue(uid).snoozed = true; ev("snooze", { uid }); toast("Snoozed"); S.openIssue = null; clampCursor(); },
+    });
+    return true;
+  }
+  return false;
+}
+
+function inboxKey(c) {
+  if (S.page !== "inbox") return false;
+  const n = current();
+  if (c === "alt+u") {
+    snapshot();
+    S.notifications.forEach((x) => { x.read = true; });
+    ev("allRead");
+    toast("All notifications marked as read");
+    return true;
+  }
+  if (c === "shift+backspace") {
+    snapshot();
+    S.notifications = S.notifications.filter((x) => !x.read);
+    ev("deleteRead");
+    toast("Deleted all read notifications");
+    clampCursor();
+    return true;
+  }
+  if (!n) return false;
+  const real = S.notifications.find((x) => x.nid === n.nid);
+  if (c === "u") {
+    snapshot();
+    real.read = !real.read;
+    ev("read", { nid: n.nid, value: real.read });
+    return true;
+  }
+  if (c === "backspace") {
+    snapshot();
+    S.notifications = S.notifications.filter((x) => x.nid !== n.nid);
+    ev("deleteNotif", { nid: n.nid });
+    toast("Notification deleted");
+    if (S.openIssue === n.uid) S.openIssue = null;
+    clampCursor();
+    return true;
+  }
+  return false;
+}
+
+function move(d) {
+  const xs = items();
+  if (!xs.length) return false;
+  const next = Math.max(0, Math.min(S.cursor + d, xs.length - 1));
+  if (next === S.cursor) return true;
+  S.cursor = next;
+  if (S.openIssue) {
+    S.openIssue = xs[next].uid;
+    if (S.page === "inbox") xs[next].read = true;
+  }
+  return true;
+}
+
+function extend(d) {
+  if (S.page === "inbox" || S.openIssue) return false;
+  const xs = items();
+  const add = (i) => { if (i && !S.selected.includes(i.uid)) S.selected.push(i.uid); };
+  add(xs[S.cursor]);
+  move(d);
+  add(xs[S.cursor]);
+  return true;
+}
+
+function escape() {
+  if (S.peek) { S.peek = false; return true; }
+  if (S.selected.length) { S.selected = []; ev("clearSel"); return true; }
+  if (S.openIssue) { S.openIssue = null; ev("close"); return true; }
+  if (S.filter) { S.filter = null; ev("clearFilter"); return true; }
+  return false;
+}
+
+function chordKey(first, c) {
+  const table = {
+    g: { i: () => goPage("inbox"), m: () => goPage("my"), t: () => goPage("triage") },
+    o: { f: () => favoritesMenu() },
+    m: { r: () => relationMenu("related"), b: () => relationMenu("blockedBy"), x: () => relationMenu("blocks"), m: () => triageAction("duplicate") },
+  }[first];
+  const fn = table[c];
+  return fn ? fn() : false;
+}
+
+function helpMenu() {
+  const external = (what) => () => toast(`In real Linear this would open ${what}`);
+  openMenu({
+    kind: "helpmenu", title: "Help", placeholder: "Search help…",
+    options: [
+      { label: "Keyboard shortcuts", keys: `${MOD}/`, value: () => { S.overlay = { kind: "help" }; ev("shortcuts"); } },
+      { label: "Docs", value: external("the docs") },
+      { label: "What's new", value: external("the changelog") },
+      { label: "Contact support", value: external("a support chat") },
+    ],
+    onPick: (fn) => fn(),
+  });
+  ev("helpMenu");
+  return true;
+}
+
+function favoritesMenu() {
+  const favs = S.issues.filter((i) => i.favorite);
+  if (!favs.length) { toast("No favorites yet — favorite something with " + ALT + "F"); return false; }
+  openMenu({
+    kind: "favorites", title: "Open favorite", options: favs.map((i) => ({ label: `${ident(i)}  ${i.title}`, value: i.uid, icon: "★" })),
+    onPick: (uid) => { ev("favOpen", { uid }); openIssueView(uid, "favorites"); },
+  });
+  return true;
+}
+
+function overlayKey(c, e) {
+  const o = S.overlay;
+  if (c === "esc") { S.overlay = null; return true; }
+  if (o.kind === "create") {
+    if (c === "mod+enter" || c === "mod+shift+enter") return submitCreate();
+    if (c === "enter") { toast(`Use ${MOD}↵ to save the issue`); return false; }
+    if (c === "backspace") { o.text = o.text.slice(0, -1); return true; }
+    if (isPrintable(e)) { o.text += e.key; return true; }
+    return false;
+  }
+  if (o.kind === "display") {
+    if (c === "mod+b") return toggleLayout();
+    return false;
+  }
+  if (o.kind === "help") {
+    if (c !== "mod+/") return false;
+    S.overlay = null;
+    return true;
+  }
+
+  const opts = filteredOptions(o);
+  const pickOpt = (opt) => {
+    if (!opt) return false;
+    S.overlay = null;
+    o.onPick(opt.value);
+    return true;
+  };
+  if (c === "down") { o.index = (o.index + 1) % Math.max(1, opts.length); return true; }
+  if (c === "up") { o.index = (o.index - 1 + opts.length) % Math.max(1, opts.length); return true; }
+  if (c === "enter") return pickOpt(opts[o.index]);
+  if (/^\d$/.test(c) && o.numbered && o.query === "") {
+    const n = Number(c);
+    return pickOpt(o.numbered === "zero" ? o.options[n] : o.options[n - 1]);
+  }
+  if (c === "backspace") { o.query = o.query.slice(0, -1); o.index = 0; return true; }
+  if (isPrintable(e)) { o.query += e.key; o.index = 0; return true; }
+  return false;
+}
+
+// Returns true when the key did something, false for a "miss".
+function simKey(c, e) {
+  if (S.overlay) return overlayKey(c, e);
+
+  if (S.chord) {
+    const { k, t } = S.chord;
+    S.chord = null;
+    if (now() - t < 1500) return chordKey(k, c);
+  }
+  if (c === "g" || c === "o" || c === "m") { S.chord = { k: c, t: now() }; return true; }
+
+  const page = S.page;
+  switch (c) {
+    case "j": case "down": return move(1);
+    case "k": case "up": return move(-1);
+    case "shift+down": return extend(1);
+    case "shift+up": return extend(-1);
+    case "enter": {
+      const cur = current();
+      if (!cur || S.openIssue) return false;
+      if (page === "inbox") cur.read = true;
+      openIssueView(cur.uid, "enter");
+      return true;
+    }
+    case "esc": return escape();
+    case "space":
+      if (page === "inbox" || S.openIssue || !current()) return false;
+      S.peek = !S.peek;
+      if (S.peek) ev("peek");
+      return true;
+    case "x": {
+      if (page === "inbox" || S.openIssue || !current()) return false;
+      const uid = current().uid;
+      S.selected = S.selected.includes(uid) ? S.selected.filter((u) => u !== uid) : [...S.selected, uid];
+      ev("select");
+      return true;
+    }
+    case "mod+a":
+      if (page === "inbox" || S.openIssue) return false;
+      S.selected = items().map((i) => i.uid);
+      ev("selectAll");
+      return true;
+    case "c": return openCreate();
+    case "s": return propMenu("status");
+    case "p": return propMenu("priority");
+    case "a": return propMenu("assignee");
+    case "l": return propMenu("labels");
+    case "i": return assignMe("key");
+    case "shift+p": return propMenu("project");
+    case "shift+d": return propMenu("due");
+    case "mod+shift+m": return propMenu("team");
+    case "shift+s": return toggleFlag("subscribed", "Subscribed to issue", "Unsubscribed from issue");
+    case "alt+f": return toggleFlag("favorite", "Added to favorites", "Removed from favorites");
+    case "mod+k": return cmdK();
+    case "/": return searchMenu();
+    case "f": return filterMenu();
+    case "shift+v": return showDisplay();
+    case "mod+b": return toggleLayout();
+    case "?": return helpMenu();
+    case "mod+/": S.overlay = { kind: "help" }; ev("shortcuts"); return true;
+    case "mod+z": return undo();
+    case "mod+.": return copy("id");
+    case "mod+shift+.": return copy("branch");
+    case "mod+shift+o": return subIssue();
+    case "h": return snoozeMenu();
+    case "u": case "alt+u": case "backspace": case "shift+backspace": return inboxKey(c);
+    case "1": return triageAction("accept");
+    case "2": return triageAction("decline");
+    case "3": return triageAction("duplicate");
+    default: return false;
+  }
+}
+
+// ====================================================================================
+// Challenges
+// ====================================================================================
+const T = {};
+function tpl(id, keys, def) { T[id] = { id, keys, page: "issues", ...def }; }
+const L = () => listIssues();
+const I = (uid) => getIssue(uid);
+const B = (t) => `<b>${esc(t)}</b>`;
+const evs = (type, pred = () => true) => S.events.some((e) => e.type === type && pred(e));
+const indexOf = (uid) => L().findIndex((i) => i.uid === uid);
+
+function focusIssue(uid) { S.cursor = Math.max(0, indexOf(uid)); }
+
+tpl("move", ["J / K"], { hint: "J moves down, K moves up (arrow keys work too)", gen() {
+  const xs = L();
+  const t = rand(xs.filter((_, n) => Math.abs(n - S.cursor) >= 2));
+  if (!t) return null;
+  return { text: `Highlight ${B(ident(t))}`, check: () => !S.openIssue && currentIssue()?.uid === t.uid };
+} });
+tpl("open", ["↵"], { hint: "Highlight it with J / K, then press Enter", gen() {
+  const t = rand(L().filter((_, n) => n !== S.cursor));
+  return t && { text: `Open ${B(ident(t))}`, check: () => S.openIssue === t.uid };
+} });
+tpl("back", ["Esc"], { hint: "Esc takes you back one level", gen() {
+  const t = rand(L());
+  S.openIssue = t.uid;
+  focusIssue(t.uid);
+  return { text: `You're inside ${B(ident(t))}. Go back to the list.`, check: () => !S.openIssue };
+} });
+tpl("peek", ["Space"], { hint: "Highlight it, then tap Space to peek (Esc or Space closes it)", gen() {
+  const t = rand(L().filter((_, n) => n !== S.cursor));
+  return t && { text: `Peek at ${B(ident(t))} without opening it`, check: () => S.peek && !S.openIssue && currentIssue()?.uid === t.uid };
+} });
+tpl("create", ["C", `${MOD}↵`], { hint: `Press C, type the title, then ${MOD}↵ to save`, gen() {
+  const title = rand(NEW_TITLES.filter((x) => !S.issues.some((i) => norm(i.title) === norm(x))));
+  return title && { text: `Create an issue titled ${B(title)}`, check: () => S.issues.some((i) => norm(i.title) === norm(title)) };
+} });
+tpl("status", ["S"], { hint: "Highlight the issue, press S, then pick (type to filter, or press its number)", gen() {
+  const t = rand(L());
+  const st = rand(STATUSES.filter((x) => x !== t.status));
+  return { text: `Set the ${B("status")} of ${B(ident(t))} to ${B(st)}`, check: () => I(t.uid)?.status === st };
+} });
+tpl("priority", ["P"], { hint: "P opens priority — 0 none, 1 urgent, 2 high, 3 medium, 4 low", gen() {
+  const t = rand(L());
+  const p = rand([1, 2, 3, 4].filter((x) => x !== t.priority));
+  return { text: `Set the ${B("priority")} of ${B(ident(t))} to ${B(PRIORITIES[p])}`, check: () => I(t.uid)?.priority === p };
+} });
+tpl("assign", ["A"], { hint: "A opens the assignee menu — type a name and press Enter", gen() {
+  const t = rand(L());
+  const u = rand(USERS.filter((x) => x !== "You" && x !== t.assignee));
+  return { text: `Set the ${B("assignee")} of ${B(ident(t))} to ${B(u)}`, check: () => I(t.uid)?.assignee === u };
+} });
+tpl("assignMe", ["I"], { hint: "I assigns the highlighted issue to yourself in one keystroke", gen() {
+  const t = rand(L().filter((i) => i.assignee !== "You"));
+  return t && { text: `Assign ${B(ident(t))} to yourself — in one keystroke`, check: () => I(t.uid)?.assignee === "You" && evs("assignMe") };
+} });
+tpl("label", ["L"], { hint: "L opens labels — Enter toggles the highlighted label", gen() {
+  const t = rand(L());
+  const l = rand(LABELS.filter((x) => !t.labels.includes(x)));
+  return l && { text: `Add the ${B("label")} ${B(l)} to ${B(ident(t))}`, check: () => I(t.uid)?.labels.includes(l) };
+} });
+tpl("search", ["/"], { hint: "/ opens search — type part of the title, Enter opens it", gen() {
+  const unique = (i) => S.issues.filter((x) => norm(x.title) === norm(i.title)).length === 1;
+  const t = rand(L().filter((i, n) => Math.abs(n - S.cursor) > 2 && unique(i)));
+  return t && { text: `Use search to open ${B(t.title)}`, check: () => S.openIssue === t.uid && evs("open", (e) => e.via === "search") };
+} });
+// Field-aware phrasing so prompts say which property a value belongs to ("status Done", "label Docs").
+const FIELDS = {
+  status: { filterName: "Status", cmdWord: "status", values: () => STATUSES, show: (v) => v,
+    has: (i, v) => i.status === v,
+    task: (id, v) => `set the ${B("status")} of ${B(id)} to ${B(v)}`,
+    filterTask: (v) => `issues whose ${B("status")} is ${B(v)}` },
+  priority: { filterName: "Priority", cmdWord: "priority", values: () => [1, 2, 3, 4], show: (v) => PRIORITIES[v],
+    has: (i, v) => i.priority === v,
+    task: (id, v) => `set the ${B("priority")} of ${B(id)} to ${B(PRIORITIES[v])}`,
+    filterTask: (v) => `issues whose ${B("priority")} is ${B(PRIORITIES[v])}` },
+  assignee: { filterName: "Assignee", cmdWord: "assign", values: () => USERS, show: (v) => v,
+    has: (i, v) => i.assignee === v,
+    task: (id, v) => `set the ${B("assignee")} of ${B(id)} to ${B(v)}`,
+    filterTask: (v) => `issues whose ${B("assignee")} is ${B(v)}` },
+  labels: { filterName: "Label", cmdWord: "labels", values: () => LABELS, show: (v) => v,
+    has: (i, v) => i.labels.includes(v),
+    task: (id, v) => `add the ${B("label")} ${B(v)} to ${B(id)}`,
+    filterTask: (v) => `issues with the ${B("label")} ${B(v)}` },
+  project: { filterName: "Project", cmdWord: "project", values: () => PROJECTS, show: (v) => v,
+    has: (i, v) => i.project === v,
+    task: (id, v) => `add ${B(id)} to the ${B("project")} ${B(v)}`,
+    filterTask: (v) => `issues in the ${B("project")} ${B(v)}` },
+};
+
+tpl("cmdk", [`${MOD}K`], { hint: `${MOD}K, type what you want to change, Enter, then pick the value`, gen() {
+  const field = rand(Object.keys(FIELDS));
+  const f = FIELDS[field];
+  const t = rand(L());
+  const v = rand(f.values().filter((x) => !f.has(t, x)));
+  focusIssue(t.uid);
+  return { text: `Using the command menu, ${f.task(ident(t), v)}`,
+    hint: `${MOD}K, type “${f.cmdWord}”, Enter, then pick ${f.show(v)}`,
+    check: () => f.has(I(t.uid), v) && evs("set", (e) => e.via === "cmdk" && e.field === field) };
+} });
+tpl("filter", ["F"], { hint: "F, pick the property, then pick the value", gen() {
+  const field = rand(Object.keys(FIELDS));
+  const f = FIELDS[field];
+  const v = rand(f.values().filter((x) => L().some((i) => f.has(i, x))));
+  if (v === null) return null;
+  return { text: `Filter the list to only show ${f.filterTask(v)}`,
+    hint: `F → ${f.filterName} → ${f.show(v)}`,
+    check: () => S.filter?.field === field && S.filter.value === v };
+} });
+tpl("help", [`${MOD}/`], { hint: `${MOD}/ opens the shortcut overview directly (? opens the help menu, which links there too)`, gen() {
+  return { text: `Open the ${B("keyboard shortcuts")} overview`, check: () => S.overlay?.kind === "help" };
+} });
+tpl("helpMenu", ["?"], { hint: "? (Shift + / on US keyboards) opens the help menu", gen() {
+  return { text: `Open the ${B("help menu")}`, check: () => evs("helpMenu") };
+} });
+tpl("clearSel", ["Esc"], { hint: "Esc clears the selection", gen() {
+  S.selected = L().slice(0, 3).map((i) => i.uid);
+  return { text: "You have 3 issues selected. Clear the selection.", check: () => S.selected.length === 0 };
+} });
+tpl("rangeSelect", ["⇧↓"], { hint: "Hold Shift and press ↓ twice", gen() {
+  const xs = L();
+  if (xs.length < 4) return null;
+  const n = Math.floor(Math.random() * (xs.length - 3));
+  S.cursor = n;
+  const want = xs.slice(n, n + 3).map((i) => i.uid);
+  return { text: `Select ${B(ident(xs[n]))} and the two issues below it`, check: () => want.every((u) => S.selected.includes(u)) };
+} });
+tpl("bulkPriority", ["X", "P"], { hint: "X selects the highlighted issue — select both, then P once", gen() {
+  const xs = L();
+  const a = rand(xs);
+  const b = rand(xs.filter((i) => i !== a));
+  const p = rand([1, 2, 3, 4].filter((x) => a.priority !== x || b.priority !== x));
+  return { text: `Set the ${B("priority")} of both ${B(ident(a))} and ${B(ident(b))} to ${B(PRIORITIES[p])} — select them, then change both at once`,
+    check: () => I(a.uid)?.priority === p && I(b.uid)?.priority === p };
+} });
+tpl("selectAllAssign", [`${MOD}A`, "I"], { hint: `${MOD}A selects everything, then I assigns to you`, gen() {
+  if (L().every((i) => i.assignee === "You")) return null;
+  return { text: `Assign ${B("every")} issue in this list to yourself`, check: () => !S.overlay && L().every((i) => i.assignee === "You") };
+} });
+tpl("undo", [`${MOD}Z`], { hint: `${MOD}Z undoes the last change`, gen() {
+  const t = rand(L().filter((i) => i.status !== "Canceled"));
+  const orig = t.status;
+  snapshot();
+  t.status = "Canceled";
+  focusIssue(t.uid);
+  toast(`${ident(t)} moved to Canceled`);
+  return { text: `Oops — the ${B("status")} of ${B(ident(t))} was just set to ${B("Canceled")} by accident. Undo it.`, check: () => I(t.uid)?.status === orig && evs("undo") };
+} });
+tpl("goInbox", ["G", "I"], { hint: "Press G, then I (go → inbox)", gen() {
+  return { text: `Jump to your ${B("Inbox")}`, check: () => S.page === "inbox" && !S.overlay };
+} });
+tpl("goMy", ["G", "M"], { hint: "Press G, then M (go → my issues)", gen() {
+  return { text: `Jump to ${B("My issues")}`, check: () => S.page === "my" && !S.overlay };
+} });
+tpl("goTriage", ["G", "T"], { hint: "Press G, then T (go → triage)", gen() {
+  return { text: `Jump to ${B("Triage")}`, check: () => S.page === "triage" && !S.overlay };
+} });
+tpl("layout", [`${MOD}B`], { hint: `${MOD}B toggles list ↔ board`, gen() {
+  const want = S.layout === "list" ? "board" : "list";
+  return { text: `Switch to the ${B(want)} layout`, check: () => S.layout === want };
+} });
+tpl("display", ["⇧V"], { hint: "Shift+V opens display options", gen() {
+  return { text: `Open the ${B("display options")}`, check: () => evs("display") };
+} });
+
+function ensureInbox() {
+  if (S.notifications.filter((n) => !n.snoozed && !n.read).length < 3) S.notifications = seedNotifications();
+  S.cursor = 0;
+}
+const notifLabel = (n) => `${B(ident(getIssue(n.uid)))} (“${esc(n.text)}”)`;
+const N = (nid) => S.notifications.find((n) => n.nid === nid);
+
+tpl("inboxRead", ["U"], { page: "inbox", hint: "Highlight it with J / K, then U toggles read / unread", gen() {
+  ensureInbox();
+  const n = rand(S.notifications.filter((x) => !x.read && !x.snoozed));
+  return { text: `Mark the notification about ${notifLabel(n)} as read`, check: () => N(n.nid)?.read === true };
+} });
+tpl("inboxSnooze", ["H"], { page: "inbox", hint: "Highlight it, H to snooze, then pick a time", gen() {
+  ensureInbox();
+  const n = rand(S.notifications.filter((x) => !x.snoozed));
+  return { text: `Snooze the notification about ${notifLabel(n)}`, check: () => N(n.nid)?.snoozed === true };
+} });
+tpl("inboxDelete", ["⌫"], { page: "inbox", hint: "Highlight it and press Backspace", gen() {
+  ensureInbox();
+  const n = rand(S.notifications.filter((x) => !x.snoozed));
+  return { text: `Delete the notification about ${notifLabel(n)}`, check: () => !N(n.nid) };
+} });
+tpl("inboxAllRead", [`${ALT}U`], { page: "inbox", hint: `${ALT}U marks every notification as read`, gen() {
+  ensureInbox();
+  return { text: `Mark ${B("all")} notifications as read in one go`, check: () => S.notifications.every((n) => n.read) && evs("allRead") };
+} });
+tpl("project", ["⇧P"], { hint: "Shift+P opens the project picker", gen() {
+  const t = rand(L());
+  const p = rand(PROJECTS.filter((x) => x !== t.project));
+  return { text: `Add ${B(ident(t))} to the ${B("project")} ${B(p)}`, check: () => I(t.uid)?.project === p };
+} });
+tpl("due", ["⇧D"], { hint: "Shift+D sets the due date", gen() {
+  const t = rand(L());
+  const d = rand(DUE.filter((x) => x !== t.due));
+  return { text: `Set the due date of ${B(ident(t))} to ${B(d)}`, check: () => I(t.uid)?.due === d };
+} });
+tpl("subIssue", [`${MOD}⇧O`, `${MOD}↵`], { hint: `${MOD}⇧O opens the sub-issue editor; save with ${MOD}↵`, gen() {
+  const t = rand(L());
+  S.openIssue = t.uid;
+  focusIssue(t.uid);
+  const title = rand(SUB_TITLES);
+  return { text: `Add a sub-issue ${B(title)} to ${B(ident(t))}`,
+    check: () => S.issues.some((i) => i.parent === t.uid && norm(i.title) === norm(title)) };
+} });
+tpl("blocked", ["M", "B"], { hint: "Highlight the blocked issue, press M then B, then pick the blocker", gen() {
+  const xs = L();
+  const a = rand(xs);
+  const b = rand(xs.filter((i) => i !== a));
+  return { text: `Mark ${B(ident(a))} as ${B("blocked by")} ${B(ident(b))}`,
+    check: () => S.relations.some((r) => (r.from === a.uid && r.type === "blockedBy" && r.to === b.uid) || (r.from === b.uid && r.type === "blocks" && r.to === a.uid)) };
+} });
+tpl("related", ["M", "R"], { hint: "Highlight one issue, press M then R, then pick the other", gen() {
+  const xs = L();
+  const a = rand(xs);
+  const b = rand(xs.filter((i) => i !== a));
+  return { text: `Mark ${B(ident(a))} as ${B("related")} to ${B(ident(b))}`,
+    check: () => S.relations.some((r) => r.type === "related" && ((r.from === a.uid && r.to === b.uid) || (r.from === b.uid && r.to === a.uid))) };
+} });
+tpl("moveTeam", [`${MOD}⇧M`], { hint: `${MOD}⇧M moves the issue to another team`, gen() {
+  const t = rand(L().filter((i) => i.team === "ENG"));
+  return t && { text: `Move ${B(ident(t))} to the ${B("Design")} team`, check: () => I(t.uid)?.team === "DES" };
+} });
+tpl("copyId", [`${MOD}.`], { hint: `${MOD}. copies the issue ID`, gen() {
+  const t = rand(L());
+  return { text: `Copy the issue ID of ${B(ident(t))}`, check: () => evs("copy", (e) => e.kind === "id" && e.uid === t.uid) };
+} });
+tpl("copyBranch", [`${MOD}⇧.`], { hint: `${MOD}⇧. copies the git branch name`, gen() {
+  const t = rand(L());
+  return { text: `Copy the git branch name for ${B(ident(t))}`, check: () => evs("copy", (e) => e.kind === "branch" && e.uid === t.uid) };
+} });
+tpl("subscribe", ["⇧S"], { hint: "Shift+S toggles your subscription", gen() {
+  const t = rand(L());
+  t.subscribed = true;
+  return { text: `Unsubscribe from ${B(ident(t))}`, check: () => I(t.uid)?.subscribed === false };
+} });
+tpl("favorite", [`${ALT}F`], { hint: `${ALT}F toggles favorite`, gen() {
+  const t = rand(L().filter((i) => !i.favorite));
+  return t && { text: `Add ${B(ident(t))} to your favorites`, check: () => I(t.uid)?.favorite === true };
+} });
+tpl("openFav", ["O", "F"], { hint: "Press O then F to open the favorites picker", gen() {
+  const t = rand(L().filter((_, n) => Math.abs(n - S.cursor) > 2)) ?? rand(L());
+  t.favorite = true;
+  return { text: `Open your favorite ${B(ident(t))} via the favorites picker`, check: () => S.openIssue === t.uid && evs("favOpen") };
+} });
+
+function ensureTriage() {
+  const open = S.issues.filter((i) => i.status === "Triage" && !i.snoozed);
+  for (let n = open.length; n < 3; n++) {
+    const used = new Set(S.issues.map((i) => i.title));
+    const title = rand(TRIAGE_POOL.filter((x) => !used.has(x))) ?? `${rand(TRIAGE_POOL)} (${S.nextNum.ENG})`;
+    S.issues.push({ uid: "t" + uidCounter++, team: "ENG", num: S.nextNum.ENG++, title, status: "Triage", priority: 0, assignee: null,
+      labels: [], project: null, due: null, subscribed: false, favorite: false, parent: null, snoozed: false });
+  }
+  S.cursor = 0;
+}
+tpl("triageAccept", ["1"], { page: "triage", hint: "In triage, 1 accepts the highlighted issue", gen() {
+  ensureTriage();
+  const t = rand(L());
+  return { text: `Accept ${B(ident(t))} out of triage`, check: () => I(t.uid)?.status === "Todo" };
+} });
+tpl("triageDecline", ["2"], { page: "triage", hint: "In triage, 2 declines the highlighted issue", gen() {
+  ensureTriage();
+  const t = rand(L());
+  return { text: `Decline ${B(ident(t))}`, check: () => I(t.uid)?.status === "Canceled" };
+} });
+
+const LEVELS = [
+  { id: "nav", name: "First steps", blurb: "Move, open, go back, peek", tpls: ["move", "move", "open", "back", "move", "peek", "open", "back", "peek"] },
+  { id: "create", name: "Make things", blurb: "Create issues without touching the mouse", tpls: ["create", "create", "create"] },
+  { id: "props", name: "The big five", blurb: "Status, priority, assignee, me, labels", tpls: ["status", "priority", "assign", "assignMe", "label", "status", "priority", "assignMe", "label", "assign", "status", "priority"] },
+  { id: "find", name: "Finders keepers", blurb: "Search, command menu, filters, help", tpls: ["search", "cmdk", "filter", "help", "helpMenu", "search", "cmdk", "filter", "help"] },
+  { id: "bulk", name: "Many at once", blurb: "Select, range-select, bulk edit, undo", tpls: ["clearSel", "rangeSelect", "bulkPriority", "selectAllAssign", "undo", "bulkPriority", "rangeSelect"] },
+  { id: "goto", name: "Teleportation", blurb: "Jump around the app", tpls: ["goInbox", "goMy", "goTriage", "layout", "display", "goInbox", "layout", "goTriage", "goMy"] },
+  { id: "inbox", name: "Inbox zero", blurb: "Read, snooze, delete", tpls: ["inboxRead", "inboxSnooze", "inboxDelete", "inboxRead", "inboxDelete", "inboxAllRead"] },
+  { id: "plan", name: "The planner", blurb: "Projects, due dates, sub-issues, relations", tpls: ["project", "due", "subIssue", "blocked", "related", "moveTeam", "project", "due"] },
+  { id: "dev", name: "Ship it", blurb: "Copy branch, subscribe, favorites, triage", tpls: ["copyId", "copyBranch", "subscribe", "favorite", "openFav", "triageAccept", "triageDecline", "copyBranch"] },
+];
+
+// ====================================================================================
+// Game state & progress
+// ====================================================================================
+const STORE = "linear-speedrun-v1";
+const LEGACY_STORE = "linear-adventures-v1";
+const P = Object.assign({ levels: {}, drillBest: 0, weak: {}, theme: matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",
+  infinite: { lives: 3, hintDelay: 5000 }, infiniteBest: {} },
+  JSON.parse(localStorage.getItem(STORE) || localStorage.getItem(LEGACY_STORE) || "{}"));
+const save = () => localStorage.setItem(STORE, JSON.stringify(P));
+const applyTheme = () => { document.documentElement.dataset.theme = P.theme; };
+function toggleTheme() {
+  P.theme = P.theme === "light" ? "dark" : "light";
+  save();
+  applyTheme();
+  render();
+}
+
+const DRILL_MS = 90_000;
+const LIVES_OPTIONS = [3, 2, 1];
+const HINT_DELAY_OPTIONS = [2000, 3000, 5000, 8000, 12000];
+const isRun = () => G.mode === "drill" || G.mode === "infinite";
+const infiniteKey = () => `${P.infinite.lives}|${P.infinite.hintDelay}`;
+const livesLabel = (n) => (n === 1 ? "♥ sudden death" : "♥".repeat(n));
+
+function cycleInfinite(field, options) {
+  P.infinite[field] = options[(options.indexOf(P.infinite[field]) + 1) % options.length];
+  save();
+  render();
+}
+const G = { mode: "menu", menuIdx: 0, showCheats: false, level: 0, qi: 0, ch: null, chStart: 0, hintShown: false, showKeys: false,
+  hintsUsed: 0, keys: 0, misses: 0, mice: 0, startT: 0, solved: false, advanceAt: 0, keyLog: [], drillEnd: 0, score: 0,
+  combo: 1, solvedCount: 0, seen: new Set(), shake: false, flash: false, result: null };
+
+function prepare(t) {
+  S.overlay = null; S.peek = false; S.chord = null; S.openIssue = null; S.selected = []; S.filter = null;
+  S.page = t.page;
+  clampCursor();
+}
+
+function drillPool() {
+  const done = LEVELS.filter((l) => P.levels[l.id]);
+  const levels = done.length ? done : LEVELS.slice(0, 3);
+  const ids = [...new Set(levels.flatMap((l) => l.tpls))];
+  const weighted = ids.flatMap((id) => Array(1 + Math.min(4, P.weak[id] || 0)).fill(id));
+  return weighted;
+}
+
+function nextChallenge() {
+  if (isRun() && G.solvedCount && G.solvedCount % 12 === 0) S = seedWorld();
+  const id = G.mode === "level" ? LEVELS[G.level].tpls[G.qi] : rand(drillPool());
+  const t = T[id];
+  let ch = null;
+  for (let attempt = 0; attempt < 6 && !ch; attempt++) {
+    if (attempt === 3) S = seedWorld();
+    prepare(t);
+    ch = t.gen();
+    if (ch && ch.check()) ch = null;
+  }
+  S.events = [];
+  G.ch = { ...ch, tpl: t };
+  G.chStart = now();
+  G.hintFrom = G.chStart;
+  G.solved = false;
+  G.hintShown = false;
+  G.showKeys = G.mode === "level" && !G.seen.has(id);
+  G.seen.add(id);
+  render();
+}
+
+function startLevel(idx) {
+  S = seedWorld();
+  Object.assign(G, { mode: "level", level: idx, qi: 0, hintsUsed: 0, keys: 0, misses: 0, mice: 0, startT: now(), keyLog: [], seen: new Set() });
+  nextChallenge();
+}
+
+function startDrill() {
+  S = seedWorld();
+  Object.assign(G, { mode: "drill", score: 0, combo: 1, solvedCount: 0, hintsUsed: 0, keys: 0, misses: 0, mice: 0, startT: now(), drillEnd: now() + DRILL_MS, keyLog: [], seen: new Set() });
+  nextChallenge();
+}
+
+function startInfinite() {
+  S = seedWorld();
+  Object.assign(G, { mode: "infinite", score: 0, combo: 1, solvedCount: 0, hintsUsed: 0, keys: 0, misses: 0, mice: 0, startT: now(), keyLog: [], seen: new Set() });
+  nextChallenge();
+}
+
+// Every hint (or skip) costs a heart in infinite mode; returns true when the run is over.
+function spendHint() {
+  G.hintsUsed++;
+  if (G.mode === "drill") G.combo = 1;
+  if (G.mode !== "infinite" || G.hintsUsed < P.infinite.lives) return false;
+  G.lastMiss = { text: G.ch.text, keys: G.ch.tpl.keys, hint: G.ch.hint ?? G.ch.tpl.hint };
+  finish();
+  return true;
+}
+
+function solve() {
+  G.solved = true;
+  const dt = now() - G.chStart;
+  const id = G.ch.tpl.id;
+  if (G.hintShown || dt > 9000) P.weak[id] = (P.weak[id] || 0) + 1;
+  else if (dt < 4000) P.weak[id] = Math.max(0, (P.weak[id] || 0) - 1);
+  save();
+  if (G.mode === "infinite") G.solvedCount++;
+  if (G.mode === "drill") {
+    G.score += G.combo;
+    G.combo = dt < 5000 && !G.hintShown ? Math.min(G.combo + 1, 5) : 1;
+    G.solvedCount++;
+  }
+  G.flash = true;
+  G.advanceAt = now() + 650;
+  render();
+}
+
+function finish() {
+  const elapsed = now() - G.startT;
+  if (G.mode === "level") {
+    const lvl = LEVELS[G.level];
+    const stars = G.hintsUsed === 0 ? 3 : G.hintsUsed <= 2 ? 2 : 1;
+    const prev = P.levels[lvl.id];
+    P.levels[lvl.id] = { stars: Math.max(stars, prev?.stars ?? 0), best: Math.min(elapsed, prev?.best ?? Infinity) };
+    G.result = { kind: "level", stars, elapsed, newBest: !prev || elapsed < prev.best };
+    G.menuIdx = Math.min(G.level + 1, LEVELS.length - 1);
+  } else if (G.mode === "infinite") {
+    const prev = P.infiniteBest[infiniteKey()] ?? 0;
+    P.infiniteBest[infiniteKey()] = Math.max(prev, G.solvedCount);
+    G.result = { kind: "infinite", solved: G.solvedCount, elapsed, newBest: G.solvedCount > prev, lastMiss: G.lastMiss };
+  } else {
+    const newBest = G.score > P.drillBest;
+    P.drillBest = Math.max(P.drillBest, G.score);
+    G.result = { kind: "drill", score: G.score, solved: G.solvedCount, newBest };
+  }
+  save();
+  G.mode = "done";
+  render();
+}
+
+function skip() {
+  if (G.mode !== "level" && !isRun()) return;
+  P.weak[G.ch.tpl.id] = (P.weak[G.ch.tpl.id] || 0) + 1;
+  save();
+  if (spendHint()) return;
+  if (G.mode === "level") {
+    G.qi++;
+    if (G.qi >= LEVELS[G.level].tpls.length) return finish();
+  }
+  nextChallenge();
+}
+
+function quit() { G.mode = "menu"; render(); }
+
+// ====================================================================================
+// Input
+// ====================================================================================
+const PASSTHROUGH = new Set(["mod+r", "mod+shift+r", "mod+w", "mod+q", "mod+t", "mod+l", "mod+alt+i", "mod+shift+i", "mod+shift+j", "mod+alt+j"]);
+
+document.addEventListener("keydown", (e) => {
+  const c = comboOf(e);
+  if (!c || PASSTHROUGH.has(c)) return;
+
+  if (G.mode === "menu") {
+    if (c === "j" || c === "down") G.menuIdx = Math.min(G.menuIdx + 1, LEVELS.length - 1);
+    else if (c === "k" || c === "up") G.menuIdx = Math.max(G.menuIdx - 1, 0);
+    else if (c === "enter") return startLevel(G.menuIdx);
+    else if (c === "d") return startDrill();
+    else if (c === "i") return startInfinite();
+    else if (c === "l") return cycleInfinite("lives", LIVES_OPTIONS);
+    else if (c === "h") return cycleInfinite("hintDelay", HINT_DELAY_OPTIONS);
+    else if (c === "?" || c === "mod+/") G.showCheats = !G.showCheats;
+    else if (c === "esc" && G.showCheats) G.showCheats = false;
+    else if (c === "t") return toggleTheme();
+    else if (/^[1-9]$/.test(c)) return startLevel(Number(c) - 1);
+    else return;
+    e.preventDefault();
+    return render();
+  }
+  if (G.mode === "done") {
+    e.preventDefault();
+    const again = { drill: startDrill, infinite: startInfinite }[G.result.kind];
+    if (c === "enter") return again ? again() : startLevel(G.menuIdx);
+    if (c === "r") return again ? again() : startLevel(G.level);
+    if (c === "esc") return quit();
+    return;
+  }
+
+  e.preventDefault();
+  if (G.solved) return;
+  const hadChord = S.chord?.k ?? null;
+  const wasTyping = S.overlay?.kind === "create";
+  const ok = simKey(c, e);
+  if (wasTyping || S.overlay?.kind === "create") G.hintFrom = now();
+  G.keys++;
+  if (!ok) G.misses++;
+  G.keyLog.push({ c: hadChord && !S.overlay ? `${hadChord}→${c}` : c, ok });
+  if (G.keyLog.length > 14) G.keyLog.shift();
+  G.shake = !ok;
+  if (G.ch.check()) return solve();
+  render();
+});
+
+document.addEventListener("mousedown", (e) => {
+  const action = e.target.closest("[data-action]")?.dataset.action;
+  if (action) {
+    e.preventDefault();
+    if (action === "skip") return skip();
+    if (action === "quit") return quit();
+    if (action === "drill") return startDrill();
+    if (action === "infinite") return startInfinite();
+    if (action === "lives") return cycleInfinite("lives", LIVES_OPTIONS);
+    if (action === "delay") return cycleInfinite("hintDelay", HINT_DELAY_OPTIONS);
+    if (action === "cheats") { G.showCheats = !G.showCheats; return render(); }
+    if (action === "theme") return toggleTheme();
+    if (action.startsWith("level:")) return startLevel(Number(action.slice(6)));
+    return;
+  }
+  if (e.target.closest(".app")) {
+    e.preventDefault();
+    G.mice++;
+    toast("🐭 No mice allowed! Keyboard only.");
+    render();
+  }
+});
+
+function tick() {
+  const t = now();
+  if (G.mode === "level" || isRun()) {
+    if (G.solved && t >= G.advanceAt) {
+      G.flash = false;
+      if (G.mode === "level") {
+        G.qi++;
+        if (G.qi >= LEVELS[G.level].tpls.length) finish();
+        else nextChallenge();
+      } else nextChallenge();
+    } else if (G.mode === "drill" && t >= G.drillEnd) {
+      finish();
+    } else {
+      const hintDelay = { level: 8000, drill: 5000, infinite: P.infinite.hintDelay }[G.mode];
+      if (!G.solved && !G.hintShown && t - G.hintFrom > hintDelay) {
+        G.hintShown = true;
+        if (spendHint()) return requestAnimationFrame(tick);
+        render();
+      }
+      if (S.toast && t - S.toast.t > 2200) { S.toast = null; render(); }
+      if (S.chord && t - S.chord.t > 1500) { S.chord = null; render(); }
+      const timer = document.getElementById("timer");
+      if (timer) timer.textContent = G.mode === "drill" ? Math.max(0, Math.ceil((G.drillEnd - t) / 1000)) + "s" : fmtTime(t - G.startT);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+const fmtTime = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+
+// ====================================================================================
+// Rendering
+// ====================================================================================
+function statusIcon(s) { const [ch, col] = STATUS_ICON[s] ?? ["○", "#888"]; return `<span class="st" style="color:${col}">${ch}</span>`; }
+function prioIcon(p) {
+  if (p === 1) return `<span class="pr u">!</span>`;
+  return `<span class="pr">${["···", "", "▂▄▆", "▂▄", "▂"][p]}</span>`;
+}
+function avatar(u) {
+  if (!u) return `<span class="av none"></span>`;
+  return `<span class="av" style="background:${USER_COLOR[u]}">${u === "You" ? "Me" : u[0]}</span>`;
+}
+const labelChip = (l) => `<span class="lab"><i style="background:${LABEL_COLOR[l]}"></i>${esc(l)}</span>`;
+
+function renderRow(i, n) {
+  const hl = n === S.cursor, sel = S.selected.includes(i.uid);
+  return `<div class="row ${hl ? "hl" : ""} ${sel ? "sel" : ""}">
+    ${S.selected.length ? `<span class="cb ${sel ? "on" : ""}">${sel ? "✓" : ""}</span>` : ""}
+    ${prioIcon(i.priority)}<span class="id">${ident(i)}</span>${statusIcon(i.status)}
+    <span class="tt">${esc(i.title)}${i.parent ? ` <span style="color:var(--faint)">← ${ident(getIssue(i.parent) ?? { team: "?", num: "?" })}</span>` : ""}</span>
+    <span class="meta">${i.labels.map(labelChip).join("")}${i.project ? `<span class="lab">◆ ${esc(i.project)}</span>` : ""}
+    ${i.due ? `<span class="lab">📅 ${esc(i.due)}</span>` : ""}${i.favorite ? "★" : ""}${avatar(i.assignee)}</span></div>`;
+}
+
+function renderList() {
+  const xs = listIssues();
+  if (!xs.length) return `<div class="empty">No issues here</div>`;
+  let html = "", lastGroup = null;
+  xs.forEach((i, n) => {
+    if (S.page !== "triage" && i.status !== lastGroup) {
+      lastGroup = i.status;
+      html += `<div class="grp">${statusIcon(i.status)} ${i.status} <span style="color:var(--faint)">${xs.filter((x) => x.status === i.status).length}</span></div>`;
+    }
+    html += renderRow(i, n);
+  });
+  return html;
+}
+
+function renderBoard() {
+  const xs = listIssues();
+  return `<div class="board">${STATUSES.map((st) => {
+    const col = xs.map((i, n) => [i, n]).filter(([i]) => i.status === st);
+    return `<div class="colm"><h5>${statusIcon(st)} ${st} <span style="color:var(--faint)">${col.length}</span></h5>
+      ${col.map(([i, n]) => `<div class="bcard ${n === S.cursor ? "hl" : ""} ${S.selected.includes(i.uid) ? "sel" : ""}">
+        <div class="id"><span>${ident(i)}</span>${avatar(i.assignee)}</div><div>${esc(i.title)}</div>
+        <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${prioIcon(i.priority)}${i.labels.map(labelChip).join("")}</div></div>`).join("")}</div>`;
+  }).join("")}</div>`;
+}
+
+function propsHtml(i) {
+  const rel = S.relations.filter((r) => r.from === i.uid || r.to === i.uid).map((r) => {
+    const other = getIssue(r.from === i.uid ? r.to : r.from);
+    const name = r.type === "related" ? "Related" : r.type === "duplicateOf" ? "Duplicate" : (r.type === "blockedBy") === (r.from === i.uid) ? "Blocked by" : "Blocks";
+    return `<div class="prop"><span>${name}</span><span>${other ? ident(other) : "?"}</span></div>`;
+  }).join("");
+  return `
+    <div class="prop"><span>Status</span><span>${statusIcon(i.status)} ${i.status}</span></div>
+    <div class="prop"><span>Priority</span><span>${prioIcon(i.priority)} ${PRIORITIES[i.priority]}</span></div>
+    <div class="prop"><span>Assignee</span><span>${avatar(i.assignee)} ${i.assignee ?? "Unassigned"}</span></div>
+    <div class="prop"><span>Labels</span><span>${i.labels.map(labelChip).join("") || "—"}</span></div>
+    <div class="prop"><span>Project</span><span>${esc(i.project ?? "—")}</span></div>
+    <div class="prop"><span>Due date</span><span>${esc(i.due ?? "—")}</span></div>
+    <div class="prop"><span>Team</span><span>${TEAMS.find((t) => t.key === i.team).name}</span></div>
+    <div class="prop"><span>Subscribed</span><span>${i.subscribed ? "🔔 Yes" : "🔕 No"}</span></div>
+    <div class="prop"><span>Favorite</span><span>${i.favorite ? "★ Yes" : "☆ No"}</span></div>${rel}`;
+}
+
+function renderDetail(i) {
+  const subs = S.issues.filter((x) => x.parent === i.uid);
+  return `<div class="detail"><div class="doc">
+    <div style="color:var(--dim)">${TEAMS.find((t) => t.key === i.team).name} › ${ident(i)}</div>
+    <h1>${esc(i.title)}</h1>
+    <div class="desc">No description yet. In real Linear you'd write the spec here — today we're just practising shortcuts.</div>
+    ${subs.length ? `<div class="subhead">Sub-issues</div>${subs.map((s) => `<div class="row">${statusIcon(s.status)}<span class="id">${ident(s)}</span><span class="tt">${esc(s.title)}</span></div>`).join("")}` : ""}
+    <div class="subhead">Activity</div><div style="color:var(--faint)">You created the issue · 2d ago</div>
+  </div><div class="props">${propsHtml(i)}</div></div>`;
+}
+
+function renderInbox() {
+  const xs = items();
+  const open = S.openIssue ? getIssue(S.openIssue) : null;
+  return `<div class="inbox"><div class="lst">${xs.length ? xs.map((n, k) => {
+    const i = getIssue(n.uid);
+    return `<div class="notif ${k === S.cursor ? "hl" : ""} ${n.read ? "read" : ""}"><span class="dot"></span>
+      <div><div>${i ? ident(i) + " " + esc(i.title) : "?"}</div><small>${esc(n.text)} — ${esc(n.sub)}</small></div></div>`;
+  }).join("") : `<div class="empty">Inbox zero 🎉</div>`}</div>
+  <div style="flex:1;min-width:0">${open ? renderDetail(open) : `<div class="empty">Select a notification</div>`}</div></div>`;
+}
+
+function renderPeek() {
+  const i = currentIssue();
+  if (!S.peek || S.openIssue || !i) return "";
+  return `<div class="peek"><div style="color:var(--dim)">${ident(i)} · peek</div><h2>${esc(i.title)}</h2>${propsHtml(i)}</div>`;
+}
+
+function renderOverlay() {
+  const o = S.overlay;
+  if (!o) return "";
+  if (o.kind === "create") {
+    const parent = o.parent ? getIssue(o.parent) : null;
+    return `<div class="scrim"><div class="modal">
+      <div class="crumb">ENG › ${parent ? `New sub-issue of ${ident(parent)}` : "New issue"}</div>
+      <div class="ti">${o.text ? esc(o.text) : `<span style="color:var(--faint)">Issue title</span>`}<span class="caret"></span></div>
+      <div class="de">Add description…</div>
+      <div class="foot">Esc to discard <span class="btn" style="background:var(--accent);color:#fff">Create issue <kbd>${MOD}↵</kbd></span></div>
+    </div></div>`;
+  }
+  if (o.kind === "help") {
+    return `<div class="scrim"><div class="panel cheat-panel"><h3 style="margin-top:0">Keyboard shortcuts <span style="color:var(--faint);font-weight:400">— Esc to close</span></h3>${cheatHtml()}</div></div>`;
+  }
+  if (o.kind === "display") {
+    return `<div class="scrim" style="justify-content:flex-end;padding-right:20px;padding-top:50px"><div class="panel" style="width:300px">
+      <div class="prop"><span>Layout</span><span><span class="chip ${S.layout === "list" ? "f" : ""}">List</span><span class="chip ${S.layout === "board" ? "f" : ""}">Board</span></span></div>
+      <div class="prop"><span>Grouping</span><span>Status</span></div><div class="prop"><span>Ordering</span><span>Priority</span></div>
+      <div class="prop"><span>Show sub-issues</span><span>On</span></div>
+      <div style="color:var(--faint);margin-top:10px;font-size:12px">${MOD}B toggles layout · Esc closes</div></div></div>`;
+  }
+  const opts = filteredOptions(o);
+  return `<div class="scrim"><div class="palette">
+    <div class="ctx">${esc(o.title)}</div>
+    <div class="q">${o.query ? esc(o.query) : ""}<span class="caret"></span>${o.query ? "" : `<span class="ph"> ${esc(o.placeholder)}</span>`}</div>
+    <div style="max-height:360px;overflow:auto">${opts.map((x, k) => {
+      const num = o.numbered && !o.query ? (o.numbered === "zero" ? o.options.indexOf(x) : o.options.indexOf(x) + 1) : null;
+      return `<div class="opt ${k === o.index ? "on" : ""}">${x.icon ?? ""}<span>${esc(x.label)}</span>
+        <span class="k">${x.keys ? kbdHtml(x.keys.replace(" ", " then ")) : num !== null ? `<kbd>${num}</kbd>` : ""}</span></div>`;
+    }).join("") || `<div class="opt" style="color:var(--faint)">No results</div>`}</div>
+  </div></div>`;
+}
+
+function renderApp() {
+  const unread = S.notifications.filter((n) => !n.read && !n.snoozed).length;
+  const triageCount = S.issues.filter((i) => i.status === "Triage" && !i.snoozed).length;
+  const favs = S.issues.filter((i) => i.favorite);
+  const titles = { issues: "All issues", my: "My issues", triage: "Triage", inbox: "Inbox" };
+  let body;
+  if (S.page === "inbox") body = renderInbox();
+  else if (S.openIssue && getIssue(S.openIssue)) body = renderDetail(getIssue(S.openIssue));
+  else body = S.layout === "board" && S.page !== "triage" ? renderBoard() : renderList();
+  return `<div class="app">
+    <aside class="side">
+      <div class="ws"><i></i>Acme Inc</div>
+      <div class="nav ${S.page === "inbox" ? "on" : ""}">Inbox <span class="cnt">${unread || ""}</span></div>
+      <div class="nav ${S.page === "my" ? "on" : ""}">My issues</div>
+      <div class="sec">Your teams</div>
+      <div class="nav ${S.page === "triage" ? "on" : ""}">Engineering › Triage <span class="cnt">${triageCount || ""}</span></div>
+      <div class="nav ${S.page === "issues" ? "on" : ""}">Engineering › Issues</div>
+      ${favs.length ? `<div class="sec">Favorites</div>${favs.map((i) => `<div class="nav">★ ${ident(i)}</div>`).join("")}` : ""}
+    </aside>
+    <div class="main">
+      <div class="head"><span class="title">${S.openIssue && S.page !== "inbox" ? `${titles[S.page]} › ${ident(getIssue(S.openIssue) ?? { team: "", num: "" })}` : titles[S.page]}</span>
+        ${S.filter ? `<span class="chip f">${S.filter.field === "labels" ? "Label" : S.filter.field} is ${esc(S.filter.label)} · Esc clears</span>` : ""}
+        ${S.selected.length ? `<span class="chip f">${S.selected.length} selected</span>` : ""}
+        <span class="sp"></span>${S.page === "issues" || S.page === "my" ? `<span class="chip">${S.layout === "list" ? "☰ List" : "▦ Board"}</span>` : ""}<span class="chip">Display</span>
+      </div>
+      <div class="body">${body}</div>
+    </div>
+    ${renderPeek()}${renderOverlay()}
+    ${S.toast ? `<div class="toast">${S.toast.msg}</div>` : ""}
+  </div>`;
+}
+
+function renderHud() {
+  const ch = G.ch;
+  const keys = ch.tpl.keys.map((k) => `<kbd>${esc(k)}</kbd>`).join(" ");
+  let hint = "";
+  if (G.solved) hint = `<span style="color:var(--good)">✓ Nice!</span>`;
+  else if (G.showKeys) hint = `<span class="new">NEW</span>${keys} — ${esc(ch.hint ?? ch.tpl.hint)}`;
+  else if (G.hintShown) hint = `💡 ${keys} — ${esc(ch.hint ?? ch.tpl.hint)}`;
+  let left, right;
+  if (G.mode === "level") {
+    const lvl = LEVELS[G.level];
+    const total = lvl.tpls.length;
+    left = `<div class="meta"><b>${G.level + 1} · ${esc(lvl.name)}</b>Challenge ${G.qi + 1} of ${total}<div class="bar"><i style="width:${(G.qi / total) * 100}%"></i></div></div>`;
+    right = `<div class="stat"><b id="timer">0:00</b>time</div><div class="stat"><b>${G.hintsUsed}</b>hints</div>`;
+  } else if (G.mode === "infinite") {
+    const left_ = P.infinite.lives - G.hintsUsed;
+    left = `<div class="meta"><b>∞ Infinite</b>Every hint or skip costs a heart · hint after ${P.infinite.hintDelay / 1000}s</div>`;
+    right = `<div class="stat"><b id="timer">0:00</b>time</div><div class="stat"><b>${G.solvedCount}</b>solved</div>
+      <div class="stat"><b style="color:var(--bad)">${"♥".repeat(left_)}<span style="color:var(--star-off)">${"♥".repeat(G.hintsUsed)}</span></b>hearts</div>`;
+  } else {
+    left = `<div class="meta"><b>⚡ Drill</b>Mixed shortcuts, weak ones come up more often</div>`;
+    right = `<div class="stat"><b id="timer">90s</b>left</div><div class="stat"><b>${G.score}</b>score</div><div class="stat"><b>×${G.combo}</b>combo</div>`;
+  }
+  return `<div class="hud ${G.flash ? "flash" : ""}">${left}
+    <div><div class="prompt ${G.solved ? "solved" : ""}">${ch.text}</div><div class="hint">${hint}</div></div>
+    <div class="hud-r">${right}<span class="btn" data-action="theme" title="Toggle light / dark">${P.theme === "light" ? "☾" : "☀"}</span><span class="btn" data-action="skip">Skip</span><span class="btn" data-action="quit">✕ Quit</span></div></div>`;
+}
+
+function renderKeystrip() {
+  const chord = S.chord ? `<span class="chord">${keyLabel(S.chord.k)} … waiting for the next key</span>` : "";
+  return `<div class="keystrip ${G.shake ? "shake" : ""}">Keys:
+    ${G.keyLog.map(({ c, ok }) => `<kbd class="${ok ? "" : "miss"}">${esc(c.split("→").map(keyLabel).join(" → "))}</kbd>`).join("")}${chord}
+    <span style="margin-left:auto">${G.keys} keys · ${G.misses} missed${G.mice ? ` · ${G.mice} 🐭` : ""} · ${MOD}/ shows all shortcuts</span></div>`;
+}
+
+function cheatHtml() {
+  return `<div class="cheat">${CHEATS.map(([g, rows]) => `<div class="cheat-grp"><h4>${g}</h4>${rows.map(([k, d]) =>
+    `<div class="help-row"><span>${kbdHtml(k)}</span><span>${esc(d)}</span></div>`).join("")}</div>`).join("")}</div>`;
+}
+
+function renderMenu() {
+  const stars = (n) => [1, 2, 3].map((k) => (k <= n ? "★" : `<span class="off">★</span>`)).join("");
+  return `<div class="menu">
+    <div class="logo">LINEAR<span>_</span>SPEEDRUN</div>
+    <div class="tag">Learn Linear's keyboard shortcuts by doing. Keyboard only — the mouse is banned inside the game.</div>
+    <div class="cols">
+      <div>${LEVELS.map((l, n) => `<div class="lvl ${n === G.menuIdx ? "on" : ""}" data-action="level:${n}">
+        <span class="n">${n + 1}</span><div><div class="t">${esc(l.name)}</div><div class="b">${esc(l.blurb)}</div></div>
+        <span class="s">${stars(P.levels[l.id]?.stars ?? 0)}${P.levels[l.id] ? `<div style="color:var(--faint);font-size:11px;letter-spacing:0;text-align:right">${fmtTime(P.levels[l.id].best)}</div>` : ""}</span></div>`).join("")}</div>
+      <div>
+        <div class="card"><h3>How to play</h3>
+          <div class="help-row"><span><kbd>J</kbd> <kbd>K</kbd></span><span>pick a level</span></div>
+          <div class="help-row"><span><kbd>↵</kbd> or <kbd>1</kbd>–<kbd>9</kbd></span><span>start a level</span></div>
+          <div class="help-row"><span><kbd>D</kbd></span><span>start a 90s drill</span></div>
+          <div class="help-row"><span><kbd>I</kbd></span><span>start infinite mode</span></div>
+          <div class="help-row"><span><kbd>?</kbd> or <kbd>${MOD}/</kbd></span><span>show the cheat sheet</span></div>
+          <div class="help-row"><span><kbd>T</kbd></span><span>light / dark mode <span class="btn" data-action="theme">${P.theme === "light" ? "☾ Dark" : "☀ Light"}</span></span></div>
+          <p style="margin-top:10px">Each challenge is a small task in a fake Linear workspace. A hint shows up after a few seconds;
+          finish a level without hints for ★★★.</p></div>
+        <div class="card" data-action="drill" style="cursor:pointer"><h3>⚡ Drill mode</h3>
+          <p>90 seconds of random challenges from the levels you've cleared. Fast answers build a combo, and the shortcuts you're slow on come up more often.</p>
+          <div class="help-row"><span>Best score</span><span class="big">${P.drillBest}</span></div></div>
+        <div class="card"><h3 data-action="infinite" style="cursor:pointer">∞ Infinite mode <kbd>I</kbd></h3>
+          <p>Like the drill, but no clock: keep going until you run out of hearts. Every hint you need (or skip) costs one.</p>
+          <div class="help-row"><span><kbd>L</kbd> hearts</span><span class="btn" data-action="lives">${livesLabel(P.infinite.lives)}</span></div>
+          <div class="help-row"><span><kbd>H</kbd> hint appears after</span><span class="btn" data-action="delay">${P.infinite.hintDelay / 1000}s</span></div>
+          <div class="help-row"><span>Best with these settings</span><span class="big">${P.infiniteBest[infiniteKey()] ?? 0}</span></div></div>
+        <div class="card"><h3>Mac / Windows</h3><p>${IS_MAC ? "⌘" : "Ctrl"} is ${IS_MAC ? "Cmd" : "Ctrl"} and ${IS_MAC ? "⌥" : "Alt"} is ${IS_MAC ? "Option" : "Alt"}. Everything else is the same as in Linear.</p></div>
+      </div>
+    </div>
+    <p style="color:var(--faint)"><span class="btn" data-action="cheats">Show cheat sheet (?)</span></p>
+    ${G.showCheats ? `<div class="scrim" style="position:fixed" data-action="cheats"><div class="panel cheat-panel"><h3 style="margin-top:0">Cheat sheet <span style="color:var(--faint);font-weight:400">— ? or Esc to close</span></h3>${cheatHtml()}</div></div>` : ""}
+  </div>`;
+}
+
+function renderDone() {
+  const r = G.result;
+  if (r.kind === "infinite") {
+    const m = r.lastMiss;
+    return `<div class="done"><div class="logo">GAME OVER</div>
+      <div class="big" style="font-size:64px;margin:20px">${r.solved}</div>
+      <div style="color:var(--dim)">solved in ${fmtTime(r.elapsed)} · ${livesLabel(P.infinite.lives)} · hints after ${P.infinite.hintDelay / 1000}s
+        ${r.newBest ? ` · <span style="color:var(--good)">new best!</span>` : ` · best ${P.infiniteBest[infiniteKey()]}`}</div>
+      ${m ? `<div class="card" style="margin:28px auto 0;max-width:560px;text-align:left"><div style="color:var(--dim);font-size:12px">The one that got you</div>
+        <div class="prompt" style="text-align:left;margin:6px 0">${m.text}</div>
+        <div>${m.keys.map((k) => `<kbd>${esc(k)}</kbd>`).join(" ")} — ${esc(m.hint)}</div></div>` : ""}
+      <p style="margin-top:30px"><kbd>↵</kbd> again · <kbd>Esc</kbd> menu</p></div>`;
+  }
+  if (r.kind === "drill") {
+    return `<div class="done"><div class="logo">TIME!</div>
+      <div class="big" style="font-size:64px;margin:20px">${r.score}</div>
+      <div style="color:var(--dim)">${r.solved} challenges solved${r.newBest ? ` · <span style="color:var(--good)">new best!</span>` : ` · best ${P.drillBest}`}</div>
+      <p style="margin-top:30px"><kbd>↵</kbd> again · <kbd>Esc</kbd> menu</p></div>`;
+  }
+  const lvl = LEVELS[G.level];
+  const stars = [1, 2, 3].map((k) => (k <= r.stars ? "★" : `<span class="off">★</span>`)).join("");
+  const isLast = G.level === LEVELS.length - 1;
+  return `<div class="done"><div style="color:var(--dim)">Level ${G.level + 1} cleared</div><div class="logo" style="margin:8px 0 14px">${esc(lvl.name)}</div>
+    <div class="stars">${stars}</div>
+    <table><tr><td>Time</td><td>${fmtTime(r.elapsed)}${r.newBest ? ` <span style="color:var(--good)">best!</span>` : ""}</td></tr>
+    <tr><td>Keystrokes</td><td>${G.keys}</td></tr><tr><td>Missed keys</td><td>${G.misses}</td></tr><tr><td>Hints</td><td>${G.hintsUsed}</td></tr>
+    ${G.mice ? `<tr><td>Mouse attempts</td><td>${G.mice} 🐭</td></tr>` : ""}</table>
+    <p><kbd>↵</kbd> ${isLast ? "replay" : "next level"} · <kbd>R</kbd> retry · <kbd>Esc</kbd> menu</p></div>`;
+}
+
+function render() {
+  const root = document.getElementById("root");
+  if (G.mode === "menu") root.innerHTML = renderMenu();
+  else if (G.mode === "done") root.innerHTML = renderDone();
+  else root.innerHTML = renderHud() + renderApp() + renderKeystrip();
+  G.shake = false;
+}
+
+applyTheme();
+render();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
